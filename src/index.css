@@ -210,3 +210,35 @@ body {
 .profile-header .logout:hover {
   background-color: #8e6d92;
 }
+
+.skill-graph-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+@media (max-width: 600px) {
+  .skill-graph-container text {
+    font-size: 10px;
+  }
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.bottom-right-inner {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap; 
+}
+
+.bottom-right-inner > * {
+  flex: 1 1 45%; 
+  min-width: 280px; 
+}

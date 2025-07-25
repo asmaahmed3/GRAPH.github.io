@@ -45,7 +45,7 @@ function AuditRatio() {
     <h2>Audit Ratio</h2>
     <p><strong>Audits Done:</strong> {(totalUp / 1_000_000).toFixed(2)} MB</p>
     <p><strong>Audits Received:</strong> {(totalDown / 1_000_000).toFixed(2)} MB</p>
-    <p><strong>Ratio:</strong> {auditRatio.toFixed(2)}</p>
+    <p><strong>Ratio:</strong> {auditRatio.toFixed(1)}</p>
 
     <svg width="300" height="20">
       <rect

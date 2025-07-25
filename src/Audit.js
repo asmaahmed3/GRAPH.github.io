@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./index.css";
 
-function Audit({ userId, userLogin }) {
+function Audit({ userId }) {
   const [toDoAudits, setToDoAudits] = useState([]);
   const [doneAudits, setDoneAudits] = useState([]);
 
@@ -18,6 +18,7 @@ function Audit({ userId, userLogin }) {
           createdAt
           group {
             object { name }
+            captain { login }
             members {
               user { login }
             }
@@ -33,46 +34,47 @@ function Audit({ userId, userLogin }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query,
-        variables: { auditorId: parseInt(userId, 10) }
-      })
+        variables: { auditorId: parseInt(userId, 10) },
+      }),
     })
-      .then(res => res.json())
-   .then(data => {
-  if (!data || data.errors) {
-    console.error("GraphQL error (audits):", data?.errors || "Unknown");
-    return;
-  }
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data || data.errors) {
+          console.error("GraphQL error (audits):", data?.errors || "Unknown");
+          return;
+        }
 
-  const audits = data.data.audit || [];
+        const audits = data.data.audit || [];
 
-  // Only TO DO audits
-  const toDoAudits = audits
-    .filter(a => a.grade === null)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // newest first
+      
+        const allToDo = audits.filter((a) => a.grade === null);
 
-  // Keep only the most recent one
-  const mostRecentToDo = toDoAudits[0] ? [toDoAudits[0]] : [];
+        allToDo.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-  const doneAudits = audits.filter(a => a.grade !== null);
+        const now = new Date();
+        const twoWeeks = 14 * 24 * 60 * 60 * 1000;
 
-  setToDoAudits(mostRecentToDo);
-  setDoneAudits(doneAudits);
-})
+        
+        const nonExpired = allToDo.find((audit) => {
+          const createdAt = new Date(audit.createdAt);
+          return now - createdAt <= twoWeeks;
+        });
 
-
-      .catch(err => {
+        setToDoAudits(nonExpired ? [nonExpired] : []);
+        setDoneAudits(audits.filter((a) => a.grade !== null));
+      })
+      .catch((err) => {
         console.error("Fetch error (audits):", err);
       });
   }, [userId]);
 
   const renderAudit = (audit, isTodo) => {
     const projectName = audit.group?.object?.name || "Unknown Project";
-    const peer = audit.group?.members.find(u => u.user.login !== userLogin);
-    const peerLogin = peer?.user?.login || "Unknown";
+    const peerLogin = audit.group?.captain?.login || "Unknown";
     const code = audit.private?.code;
 
     return (
@@ -91,13 +93,12 @@ function Audit({ userId, userLogin }) {
 
   return (
     <section className="section">
-      <h2>Audits</h2>
-      <p>Your audits</p>
-
+      <h2>Audit</h2>
+       <p><strong>Your audits</strong></p>
       {toDoAudits.length > 0 && (
         <>
-          <h3>TO DO 🚨</h3>
-          {toDoAudits.map(audit => renderAudit(audit, true))}
+          {toDoAudits.map((audit) => renderAudit(audit, true))}
+      
         </>
       )}
 
@@ -109,6 +110,7 @@ function Audit({ userId, userLogin }) {
 }
 
 export default Audit;
+
 
 
 

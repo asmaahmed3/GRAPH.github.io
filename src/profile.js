@@ -1,10 +1,10 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
 import AuditRatio from "./Auditratio";
 import SkillXPGraph from "./skills";
 import InProgress from "./inProgress";
 import Audit from "./Audit";
-
+import Levels from "./level";
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -25,13 +25,12 @@ function Profile() {
       window.location.href = "/login";
       return;
     }
-    console.log(JSON.parse(atob(payload)));
 
     fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         query: `
@@ -48,11 +47,11 @@ function Profile() {
               attrs
             }
           }
-        `
-      })
+        `,
+      }),
     })
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const userData = data.data.user?.[0];
         if (!userData) {
           console.error("User data not found.");
@@ -60,7 +59,7 @@ function Profile() {
         }
         setUser(userData);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Fetch error:", err);
       });
   }, []);
@@ -68,43 +67,54 @@ function Profile() {
   if (!user) return <p>Loading...</p>;
 
   return (
- <div className="profile-page">
- <div className="profile-header">
-  <h1>Welcome, {user.login}!</h1>
-  <button className="logout" onClick={() => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  }}>
-    Logout
-  </button>
- </div>
+    <div className="profile-page">
+      <div className="profile-header">
+        <h1>Welcome, {user.login}!</h1>
+        <button
+          className="logout"
+          onClick={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+          }}
+        >
+          Logout
+        </button>
+      </div>
 
-  <div className="profile-grid">
-    <div className="top-left section">
-      <h2>User Info</h2>
-      <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
-      <p><strong>Email:</strong> {user.email}</p>
-      <p><strong>Phone:</strong> {user.attrs['Phone']}</p>
+      <div className="profile-grid">
+        <div className="top-left section">
+          <h2>User Info</h2>
+          <p>
+            <strong>Name:</strong> {user.firstName} {user.lastName}
+          </p>
+          <p>
+            <strong>Email:</strong> {user.email}
+          </p>
+          <p>
+            <strong>Phone:</strong> {user.attrs["Phone"]}
+          </p>
+        </div>
+
+        <div className="top-right section">
+          <Audit userId={user.id} userLogin={user.login} />
+        </div>
+
+        <div className="middle section">
+          <SkillXPGraph />
+        </div>
+
+        <div className="bottom-left section">
+          <InProgress />
+        </div>
+
+        <div className="bottom-right section">
+          <div className="bottom-right-inner">
+            <AuditRatio />
+            <Levels />
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div className="top-right section">
-      <Audit userId={user.id} userLogin={user.login} />
-    </div>
-
-    <div className="middle section">
-      <SkillXPGraph />
-    </div>
-
-    <div className="bottom-left section">
-      <InProgress />
-    </div>
-
-    <div className="bottom-right section">
-      <AuditRatio />
-    </div>
-  </div>
-</div>
-
   );
 }
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 function SkillXPGraph() {
   const [data, setData] = useState(null);
 
@@ -8,6 +7,7 @@ function SkillXPGraph() {
     const [, payload] = token.split(".");
     const decoded = JSON.parse(atob(payload));
     const userId = parseInt(decoded.userId || decoded.sub);
+    console.log("User ID:", userId);
 
     fetch("https://learn.reboot01.com/api/graphql-engine/v1/graphql", {
       method: "POST",
@@ -31,14 +31,11 @@ function SkillXPGraph() {
       .then(res => res.json())
       .then(resData => {
         const transactions = resData.data.user[0].transactions;
-
-        // Group by skill type and sum amount
         const grouped = {};
         transactions.forEach(tx => {
           const skill = tx.type.replace("skill_", "");
           grouped[skill] = (grouped[skill] || 0) + tx.amount;
         });
-
         setData(grouped);
       });
   }, []);
@@ -48,24 +45,32 @@ function SkillXPGraph() {
   const skills = Object.keys(data);
   const maxXP = Math.max(...Object.values(data));
   const chartHeight = 200;
+  const barWidth = 40;
+  const gap = 20;
+  const totalWidth = skills.length * (barWidth + gap);
 
   return (
-    <div>
+    <div className="skill-graph-container">
       <h2>Skill XP Earned</h2>
-      <svg width={skills.length * 60} height={chartHeight + 40}>
+      <svg
+        viewBox={`0 0 ${totalWidth} ${chartHeight + 40}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: "100%", height: "auto" }}
+      >
         {skills.map((skill, i) => {
           const height = (data[skill] / maxXP) * chartHeight;
+          const x = i * (barWidth + gap);
           return (
-            <g key={i} transform={`translate(${i * 60}, 0)`}>
+            <g key={i} transform={`translate(${x}, 0)`}>
               <rect
-                x={10}
+                x={0}
                 y={chartHeight - height}
-                width={40}
+                width={barWidth}
                 height={height}
                 fill="#e2cbe3ff"
               />
               <text
-                x={30}
+                x={barWidth / 2}
                 y={chartHeight + 15}
                 textAnchor="middle"
                 fontSize="12"
@@ -80,5 +85,6 @@ function SkillXPGraph() {
     </div>
   );
 }
+
 
 export default SkillXPGraph;
