@@ -6,13 +6,13 @@ import InProgress from "./inProgress";
 import Audit from "./Audit";
 import Levels from "./level";
 
-function Profile() {
+function Profile({ onLogout }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      window.location.href = "/login";
+      onLogout(); 
       return;
     }
 
@@ -22,7 +22,7 @@ function Profile() {
     if (decoded.exp && decoded.exp < now) {
       console.warn("Token expired");
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      onLogout();
       return;
     }
 
@@ -62,7 +62,7 @@ function Profile() {
       .catch((err) => {
         console.error("Fetch error:", err);
       });
-  }, []);
+  }, [onLogout]);
 
   if (!user) return <p>Loading...</p>;
 
@@ -74,7 +74,7 @@ function Profile() {
           className="logout"
           onClick={() => {
             localStorage.removeItem("token");
-            window.location.href = "/login";
+            onLogout();
           }}
         >
           Logout

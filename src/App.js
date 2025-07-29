@@ -14,11 +14,16 @@ function App() {
 
   return (
     <div className="app-container">
-      {loggedIn ? <Profile /> : <Login onLogin={() => setLoggedIn(true)} />}
+      {loggedIn ? (
+        <Profile onLogout={() => setLoggedIn(false)} />
+      ) : (
+        <Login onLogin={() => setLoggedIn(true)} />
+      )}
     </div>
   );
 }
 
 export default App;
+
 
 
